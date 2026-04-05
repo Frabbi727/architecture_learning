@@ -148,6 +148,12 @@ A short explanation you can use:
 
 "I used feature-first MVVM with GetX. Each feature has its own page, controller, binding, repository, and model. Login saves the JWT in secure storage. All later API calls go through one shared API client, which automatically injects the bearer token. This keeps controllers thin, avoids repeating networking logic, and is easier to scale later."
 
+## Interview Prep Pack
+
+For a full project-based interview study guide with OOP, SOLID, Q&A, and mock interview practice, see:
+
+- `INTERVIEW_PREP.md`
+
 ## Running The Project
 
 ```bash

@@ -18,7 +18,8 @@ class AppPages {
       name: AppRoutes.users,
       page: UsersPage.new,
       binding: UsersBinding(),
-    ),    GetPage<HomePage>(
+    ),
+    GetPage<HomePage>(
       name: AppRoutes.homePage,
       page: HomePage.new,
       binding: HomePageBindings(),

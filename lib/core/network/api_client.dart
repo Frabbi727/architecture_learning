@@ -161,6 +161,7 @@ class ApiClient {
   Future<Resource<T>> getModelResource<T>(
     String endpoint, {
     required JsonParser<T> parser,
+
   }) {
     return getResource<T>(
       endpoint,
