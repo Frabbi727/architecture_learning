@@ -1,18 +1,22 @@
 # Architecture Learning
 
-This project is a small Flutter interview-prep app built with `GetX` and a simple MVVM structure.
+This project is a small Flutter interview-prep app built with `GetX`, a feature-first MVVM structure, real JWT login, and authenticated API calls through one shared client.
 
 Flow:
-- Login with mock API
-- Show user list
+- Login with a real auth endpoint
+- Save JWT securely
+- Fetch users through a shared API client
 - Create user
 - Edit user
 - Delete user
-- Logout
+- Logout and clear token
 
 Demo credentials:
-- `interview@demo.com`
-- `password123`
+- `emilys`
+- `emilyspass`
+
+API used:
+- `https://dummyjson.com`
 
 ## Project Structure
 
@@ -20,143 +24,129 @@ Demo credentials:
 lib/
   main.dart
   app/
+    app.dart
+    bindings/
+    routes/
   core/
-  data/
-  domain/
-  presentation/
+    constants/
+    network/
+    utils/
+  features/
+    auth/
+      bindings/
+      controllers/
+      pages/
+      repositories/
+      widgets/
+    users/
+      bindings/
+      controllers/
+      models/
+      pages/
+      repositories/
+      widgets/
 ```
 
-What each layer does:
-- `app`: app setup, routes, bindings
-- `core`: shared result type, errors, validators, constants
-- `domain`: entities, repository contracts, use cases
-- `data`: mock data sources, models, repository implementations
-- `presentation`: pages, widgets, GetX controllers
+What each part does:
+- `app`: app startup, global binding, routes
+- `core/constants`: base URL and endpoints
+- `core/network`: shared HTTP client and token storage
+- `core/utils`: validators
+- `features/auth`: login feature
+- `features/users`: users list and CRUD feature
 
-## Why This Is MVVM
+## Architecture Idea
 
-In this project:
-- View = Flutter page and widgets
+This app uses a simple feature-first MVVM structure:
+
+- View = page/widgets
 - ViewModel = GetX controller
-- Model = domain entities plus use cases and repositories
+- Model/Data = feature repository + models
 
-Examples:
-- View: login page, users page
-- ViewModel: `LoginController`, `UsersController`
-- Model side: `User`, `AuthSession`, `LoginUseCase`, `UserRepository`
+Main runtime flow:
 
-Important rule:
-- The view should only render UI and forward events.
-- The controller should manage screen state and call use cases.
-- The controller should not talk directly to API classes.
+`Page -> Controller -> Repository -> RepositoryImpl -> ApiClient`
 
-## How Data Flows
+That is the main thing to explain in an interview.
 
-Login flow:
-1. User taps login in the view.
-2. `LoginController` validates form input.
-3. Controller calls `LoginUseCase`.
-4. Use case calls `AuthRepository`.
-5. Repository calls mock auth data source.
-6. Result comes back as success or failure.
-7. Controller updates loading/error state and navigates on success.
+## How Login Works
 
-User list flow:
-1. `UsersController` loads users.
-2. Controller calls `GetUsersUseCase`.
-3. Use case calls `UserRepository`.
-4. Repository gets data from mock user data source.
-5. Controller exposes `users`, `isLoading`, and `errorMessage` to the UI.
+1. User enters username and password on the login page.
+2. `LoginController` validates the form and calls `AuthRepository`.
+3. `AuthRepositoryImpl` calls the login API through `ApiClient`.
+4. Login response returns JWT tokens.
+5. `AuthStorage` saves the token securely.
+6. Controller navigates to the users screen.
+
+## How Authenticated API Calls Work
+
+This is the most important shared design in the project:
+
+- token is saved once after login
+- all later API calls go through `ApiClient`
+- `ApiClient` reads token from `AuthStorage`
+- `ApiClient` automatically adds:
+
+```http
+Authorization: Bearer <token>
+```
+
+So feature repositories do not repeat token logic.
+
+That means:
+- `UserRepositoryImpl` only asks for data
+- `ApiClient` handles headers, base URL, JSON, and error parsing
+
+## Why This Is Easy To Explain
+
+This structure is smaller than full clean architecture, but still shows good separation:
+
+- page only handles UI
+- controller only handles screen state and actions
+- repository only handles feature data logic
+- shared API client only handles networking and auth header injection
+
+This is a good interview answer because it is practical, workable, and easy to scale later.
 
 ## SOLID In This Project
 
 Single Responsibility Principle:
-- Controller manages presentation state.
-- Use case handles one business action.
-- Repository abstracts data access.
-- Data source simulates API behavior.
+- page renders UI
+- controller manages state
+- repository handles feature data operations
+- API client handles networking
+- auth storage handles token persistence
 
 Open/Closed Principle:
-- You can replace the mock repository or data source with a real API implementation without changing the UI flow.
+- repository implementations can be replaced later without changing page/controller code
 
 Liskov Substitution Principle:
-- `AuthRepository` and `UserRepository` are contracts.
-- Any correct implementation can replace the current one.
+- feature code depends on repository contracts, not only one concrete implementation
 
 Interface Segregation Principle:
-- Auth and user operations are split into separate repository interfaces.
-- Consumers only depend on what they need.
+- auth and users are split into separate repositories
 
 Dependency Inversion Principle:
-- Controllers depend on use cases.
-- Use cases depend on repository contracts.
-- High-level code does not depend on concrete data-source classes.
+- controllers depend on repository abstractions
+- repositories depend on shared API/storage services
 
-## OOP Concepts Used
+## Build Runner
 
-Encapsulation:
-- Logic is grouped inside repository, use case, and controller classes.
+`UserModel` uses `json_serializable` and generates:
 
-Abstraction:
-- Repositories expose contracts, not implementation details.
+- `lib/features/users/models/user_model.g.dart`
 
-Inheritance:
-- Controllers extend `GetxController`.
+Regenerate with:
 
-Polymorphism:
-- Repository implementations can be swapped behind the same interface.
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
 
-## Best Practice vs Bad Practice
+## Interview Explanation
 
-Bad practice:
-- Put validation, API calls, navigation, mapping, and business rules all inside one large GetX controller.
+A short explanation you can use:
 
-Better practice:
-- Keep controller focused on UI state.
-- Move business actions into use cases.
-- Put data access behind repository interfaces.
-- Keep mock or remote logic in data sources.
-
-Bad practice:
-- Let widgets call repositories directly.
-
-Better practice:
-- Widgets trigger controller methods only.
-
-Bad practice:
-- Return raw exceptions everywhere.
-
-Better practice:
-- Return a simple `Result<T>` with success/failure so UI state is easier to manage.
-
-## Interview Questions You Can Expect
-
-What is MVVM?
-- MVVM separates UI, UI state/interaction logic, and business/data logic so code is easier to test and maintain.
-
-Why use a repository?
-- It hides where data comes from and lets us swap mock, local, or remote implementations without changing higher layers.
-
-Why use use cases?
-- They keep business actions explicit and stop controllers from becoming too large.
-
-Why not call the API directly from the controller?
-- That couples presentation to data access and makes testing and future change harder.
-
-What does GetX do here?
-- Routing, dependency registration, and reactive UI state.
-- It is not used as the whole architecture.
-
-How would you scale this?
-- Add more features under the same layers.
-- Keep one controller per screen or feature.
-- Add local cache or real API implementations behind repository interfaces.
-
-## How To Explain This In Interview
-
-A simple way to explain:
-
-"I kept the app small but layered. The UI is in presentation, business actions are in use cases, contracts are in domain, and implementations are in data. GetX handles state, routing, and DI, but the controller stays thin. That gives me better separation of concerns, testability, and easier replacement of mock data with real APIs."
+"I used feature-first MVVM with GetX. Each feature has its own page, controller, binding, repository, and model. Login saves the JWT in secure storage. All later API calls go through one shared API client, which automatically injects the bearer token. This keeps controllers thin, avoids repeating networking logic, and is easier to scale later."
 
 ## Running The Project
 
@@ -165,9 +155,10 @@ flutter pub get
 flutter run
 ```
 
-## Running Verification
+## Verification
 
 ```bash
+dart run build_runner build --delete-conflicting-outputs
 flutter analyze
 flutter test
 ```

@@ -1,0 +1,59 @@
+import 'package:architecture_learning/core/enums/enums.dart';
+import 'package:architecture_learning/core/utils/resource.dart';
+import 'package:architecture_learning/features/auth/controllers/login_controller.dart';
+import 'package:architecture_learning/features/auth/models/login_response_model.dart';
+import 'package:architecture_learning/features/auth/repositories/auth_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+class _FailingAuthRepository implements AuthRepository {
+  @override
+  Future<Resource<LoginResponseModel>> login({
+    required String email,
+    required String password,
+  }) async {
+    return Resource<LoginResponseModel>(
+      status: ResourceStatus.error,
+      message: 'Invalid credentials',
+    );
+  }
+
+  @override
+  Future<void> logout() async {}
+}
+
+void main() {
+  testWidgets('login controllers exposes login error', (tester) async {
+    final controller = LoginController(_FailingAuthRepository());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: controller.formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: controller.usernameController,
+                  validator: (_) => null,
+                ),
+                TextFormField(
+                  controller: controller.passwordController,
+                  validator: (_) => null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    controller.usernameController.text = 'wrong';
+    controller.passwordController.text = 'wrong';
+
+    await controller.login();
+
+    expect(controller.errorMessage.value, 'Invalid credentials');
+    controller.onClose();
+  });
+}

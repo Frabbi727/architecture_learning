@@ -1,6 +1,6 @@
-import 'package:architecture_learning/presentation/bindings/app_binding.dart';
-import 'package:architecture_learning/presentation/routes/app_pages.dart';
-import 'package:architecture_learning/presentation/routes/app_routes.dart';
+import 'package:architecture_learning/app/bindings/app_binding.dart';
+import 'package:architecture_learning/app/routes/app_pages.dart';
+import 'package:architecture_learning/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
