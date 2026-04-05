@@ -18,7 +18,7 @@ class _FailingAuthRepository implements AuthRepository {
 }
 
 void main() {
-  testWidgets('login controller exposes login error', (tester) async {
+  testWidgets('login controllers exposes login error', (tester) async {
     final controller = LoginController(_FailingAuthRepository());
 
     await tester.pumpWidget(

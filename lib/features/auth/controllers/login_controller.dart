@@ -30,7 +30,7 @@ class LoginController extends GetxController {
         password: passwordController.text.trim(),
       );
 
-      Get.offAllNamed(AppRoutes.users);
+      Get.offAllNamed(AppRoutes.homePage);
     } catch (error) {
       errorMessage.value = _normalizeError(error);
     } finally {

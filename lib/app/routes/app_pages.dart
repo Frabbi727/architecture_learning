@@ -1,6 +1,8 @@
 import 'package:architecture_learning/app/routes/app_routes.dart';
 import 'package:architecture_learning/features/auth/bindings/auth_binding.dart';
 import 'package:architecture_learning/features/auth/pages/login_page.dart';
+import 'package:architecture_learning/features/home_page/bindings/home_page_bindings.dart';
+import 'package:architecture_learning/features/home_page/page/home_page.dart';
 import 'package:architecture_learning/features/users/bindings/users_binding.dart';
 import 'package:architecture_learning/features/users/pages/users_page.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,10 @@ class AppPages {
       name: AppRoutes.users,
       page: UsersPage.new,
       binding: UsersBinding(),
+    ),    GetPage<HomePage>(
+      name: AppRoutes.homePage,
+      page: HomePage.new,
+      binding: HomePageBindings(),
     ),
   ];
 }

@@ -148,27 +148,24 @@ ${_prettyData(response.data)}
     }
     handler.next(err);
   }
-  String _prettyMap(Map data) {
-    return data.entries
-        .map((e) => '│   ${e.key}: ${e.value}')
-        .join('\n');
+
+  String _prettyMap(Map<dynamic, dynamic> data) {
+    return data.entries.map((e) => '│   ${e.key}: ${e.value}').join('\n');
   }
 
   String _prettyData(dynamic data) {
-    if (data == null) return '│   null';
+    if (data == null) {
+      return '│   null';
+    }
 
     try {
       if (data is Map || data is List) {
         const encoder = JsonEncoder.withIndent('  ');
-        return data
-            .toString()
-            .split('\n')
-            .map((e) => '│   $e')
-            .join('\n');
-      } else {
-        return '│   $data';
+        return encoder.convert(data).split('\n').map((e) => '│   $e').join('\n');
       }
-    } catch (e) {
+
+      return '│   $data';
+    } catch (_) {
       return '│   $data';
     }
   }

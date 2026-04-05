@@ -16,7 +16,7 @@ LoginResponseModel _$LoginResponseModelFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$LoginResponseModelToJson(LoginResponseModel instance) =>
     <String, dynamic>{
       'success': instance.success,
-      'data': instance.data,
+      'data': instance.data.toJson(),
       'meta': instance.meta,
     };
 
@@ -37,7 +37,7 @@ Map<String, dynamic> _$LoginDataModelToJson(LoginDataModel instance) =>
       'expires_in': instance.expiresIn,
       'refresh_token': instance.refreshToken,
       'refresh_expires_in': instance.refreshExpiresIn,
-      'user': instance.user,
+      'user': instance.user.toJson(),
     };
 
 AuthUserModel _$AuthUserModelFromJson(Map<String, dynamic> json) =>

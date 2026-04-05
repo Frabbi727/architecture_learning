@@ -39,7 +39,7 @@ class _FakeUserRepository implements UserRepository {
 }
 
 void main() {
-  test('users controller loads users successfully', () async {
+  test('users controllers loads users successfully', () async {
     final controller = UsersController(
       _FakeUserRepository([
         const UserModel(
