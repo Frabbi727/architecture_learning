@@ -29,6 +29,10 @@ class ShopListResponseModel {
   String toString() {
     return 'ShopListResponseModel{success: $success, data: $data, meta: $meta}';
   }
+  static List<ShopListResponseModel> listFromJson(List<dynamic> list) =>
+      List<ShopListResponseModel>.from(
+        list.map((x) => ShopListResponseModel.fromJson(x as Map<String, dynamic>)),
+      );
 
 }
 
@@ -98,10 +102,14 @@ class ShopModel {
 
   Map<String, dynamic> toJson() => _$ShopModelToJson(this);
 
+  static List<ShopModel> listFromJson(List<dynamic> list) =>
+      List<ShopModel>.from(
+        list.map((x) => ShopModel.fromJson(x as Map<String, dynamic>)),
+      );
+
   @override
   String toString() {
     return 'ShopModel{id: $id, marketId: $marketId, marketName: $marketName, shopName: $shopName, shopCode: $shopCode, ownerId: $ownerId, ownerName: $ownerName, shopSqft: $shopSqft, status: $status, description: $description, phone: $phone, email: $email, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 
 }
-

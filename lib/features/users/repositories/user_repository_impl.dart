@@ -1,6 +1,7 @@
 import 'package:architecture_learning/core/constants/api_constants.dart';
 import 'package:architecture_learning/core/network/api_client.dart';
 import 'package:architecture_learning/core/network/auth_storage.dart';
+import 'package:architecture_learning/core/utils/resource.dart';
 import 'package:architecture_learning/features/users/models/user_model.dart';
 import 'package:architecture_learning/features/users/repositories/user_repository.dart';
 
@@ -11,23 +12,26 @@ class UserRepositoryImpl implements UserRepository {
   final AuthStorage _authStorage;
 
   @override
-  Future<UserModel> createUser(Map<String, dynamic> body) async {
-    final data = await _apiClient.post(ApiConstants.addUser, body);
-    return UserModel.fromJson(data as Map<String, dynamic>);
+  Future<Resource<UserModel>> createUser(Map<String, dynamic> body) async {
+    return _apiClient.postModelResource<UserModel>(
+      ApiConstants.addUser,
+      body,
+      parser: UserModel.fromJson,
+    );
   }
 
   @override
-  Future<void> deleteUser(int id) async {
-    await _apiClient.delete('${ApiConstants.users}/$id');
+  Future<Resource<void>> deleteUser(int id) async {
+    return _apiClient.deleteResource('${ApiConstants.users}/$id');
   }
 
   @override
-  Future<List<UserModel>> fetchUsers() async {
-    final data = await _apiClient.get(ApiConstants.users);
-    final users = (data['users'] as List<dynamic>? ?? <dynamic>[])
-        .cast<Map<String, dynamic>>();
-
-    return users.map(UserModel.fromJson).toList(growable: false);
+  Future<Resource<List<UserModel>>> fetchUsers() async {
+    return _apiClient.getListResource<UserModel>(
+      ApiConstants.users,
+      dataKey: 'users',
+      itemParser: UserModel.fromJson,
+    );
   }
 
   @override
@@ -36,8 +40,11 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<UserModel> updateUser(int id, Map<String, dynamic> body) async {
-    final data = await _apiClient.put('${ApiConstants.users}/$id', body);
-    return UserModel.fromJson(data as Map<String, dynamic>);
+  Future<Resource<UserModel>> updateUser(int id, Map<String, dynamic> body) async {
+    return _apiClient.putModelResource<UserModel>(
+      '${ApiConstants.users}/$id',
+      body,
+      parser: UserModel.fromJson,
+    );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:architecture_learning/core/constants/api_constants.dart';
 import 'package:architecture_learning/core/network/api_client.dart';
 import 'package:architecture_learning/core/network/auth_storage.dart';
+import 'package:architecture_learning/core/enums/enums.dart';
+import 'package:architecture_learning/core/utils/resource.dart';
 import 'package:architecture_learning/features/auth/models/login_response_model.dart';
 import 'package:architecture_learning/features/auth/repositories/auth_repository.dart';
 
@@ -11,26 +13,29 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthStorage _authStorage;
 
   @override
-  Future<LoginResponseModel> login({
+  Future<Resource<LoginResponseModel>> login({
     required String email,
     required String password,
   }) async {
-    final response = await _apiClient.post(
+    final result = await _apiClient.postModelResource<LoginResponseModel>(
       ApiConstants.login,
       {
         'email': email,
         'password': password,
       },
+      parser: LoginResponseModel.fromJson,
     );
 
-    if (response is! Map<String, dynamic>) {
-      throw Exception('Login response format was invalid');
+    final loginResponse = result.model;
+    if (result.status != ResourceStatus.success || loginResponse == null) {
+      return result;
     }
 
-    final loginResponse = LoginResponseModel.fromJson(response);
-
     if (loginResponse.data.accessToken.isEmpty) {
-      throw Exception('Login succeeded but token was missing');
+      return Resource<LoginResponseModel>(
+        status: ResourceStatus.error,
+        message: 'Login succeeded but token was missing',
+      );
     }
 
     await _authStorage.saveToken(loginResponse.data.accessToken);
@@ -38,7 +43,11 @@ class AuthRepositoryImpl implements AuthRepository {
       await _authStorage.saveRefreshToken(loginResponse.data.refreshToken);
     }
 
-    return loginResponse;
+    return Resource<LoginResponseModel>(
+      status: ResourceStatus.success,
+      model: loginResponse,
+      code: result.code,
+    );
   }
 
   @override

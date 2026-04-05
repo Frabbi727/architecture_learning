@@ -1,3 +1,5 @@
+import 'package:architecture_learning/core/enums/enums.dart';
+import 'package:architecture_learning/core/utils/resource.dart';
 import 'package:architecture_learning/features/users/controllers/users_controller.dart';
 import 'package:architecture_learning/features/users/models/user_model.dart';
 import 'package:architecture_learning/features/users/pages/users_page.dart';
@@ -11,31 +13,44 @@ class _FakeUserRepository implements UserRepository {
   final List<UserModel> seedUsers;
 
   @override
-  Future<UserModel> createUser(Map<String, dynamic> body) async {
-    return UserModel(
-      id: 1,
-      firstName: body['firstName'] as String,
-      lastName: body['lastName'] as String,
-      email: body['email'] as String,
+  Future<Resource<UserModel>> createUser(Map<String, dynamic> body) async {
+    return Resource<UserModel>(
+      status: ResourceStatus.success,
+      model: UserModel(
+        id: 1,
+        firstName: body['firstName'] as String,
+        lastName: body['lastName'] as String,
+        email: body['email'] as String,
+      ),
     );
   }
 
   @override
-  Future<void> deleteUser(int id) async {}
+  Future<Resource<void>> deleteUser(int id) async {
+    return Resource<void>(status: ResourceStatus.success);
+  }
 
   @override
-  Future<List<UserModel>> fetchUsers() async => seedUsers;
+  Future<Resource<List<UserModel>>> fetchUsers() async {
+    return Resource<List<UserModel>>(
+      status: ResourceStatus.success,
+      model: seedUsers,
+    );
+  }
 
   @override
   Future<void> logout() async {}
 
   @override
-  Future<UserModel> updateUser(int id, Map<String, dynamic> body) async {
-    return UserModel(
-      id: id,
-      firstName: body['firstName'] as String,
-      lastName: body['lastName'] as String,
-      email: body['email'] as String,
+  Future<Resource<UserModel>> updateUser(int id, Map<String, dynamic> body) async {
+    return Resource<UserModel>(
+      status: ResourceStatus.success,
+      model: UserModel(
+        id: id,
+        firstName: body['firstName'] as String,
+        lastName: body['lastName'] as String,
+        email: body['email'] as String,
+      ),
     );
   }
 }

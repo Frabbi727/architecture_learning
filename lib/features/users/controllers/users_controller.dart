@@ -1,4 +1,5 @@
 import 'package:architecture_learning/app/routes/app_routes.dart';
+import 'package:architecture_learning/core/enums/enums.dart';
 import 'package:architecture_learning/features/users/models/user_model.dart';
 import 'package:architecture_learning/features/users/repositories/user_repository.dart';
 import 'package:get/get.dart';
@@ -22,16 +23,15 @@ class UsersController extends GetxController {
   }
 
   Future<void> fetchUsers() async {
-    try {
-      isLoading.value = true;
-      errorMessage.value = '';
-      final result = await _repository.fetchUsers();
-      users.assignAll(result);
-    } catch (error) {
-      errorMessage.value = _normalizeError(error);
-    } finally {
-      isLoading.value = false;
+    isLoading.value = true;
+    errorMessage.value = '';
+    final result = await _repository.fetchUsers();
+    if (result.status == ResourceStatus.success) {
+      users.assignAll(result.model ?? const <UserModel>[]);
+    } else {
+      errorMessage.value = result.message ?? 'Failed to load users';
     }
+    isLoading.value = false;
   }
 
   Future<bool> createUser({
@@ -39,22 +39,21 @@ class UsersController extends GetxController {
     required String lastName,
     required String email,
   }) async {
-    try {
-      isSaving.value = true;
-      errorMessage.value = '';
-      final created = await _repository.createUser({
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-      });
-      users.insert(0, created);
+    isSaving.value = true;
+    errorMessage.value = '';
+    final result = await _repository.createUser({
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+    });
+    isSaving.value = false;
+
+    if (result.status == ResourceStatus.success && result.model != null) {
+      users.insert(0, result.model!);
       return true;
-    } catch (error) {
-      errorMessage.value = _normalizeError(error);
-      return false;
-    } finally {
-      isSaving.value = false;
     }
+    errorMessage.value = result.message ?? 'Failed to create user';
+    return false;
   }
 
   Future<bool> updateUser({
@@ -63,41 +62,39 @@ class UsersController extends GetxController {
     required String lastName,
     required String email,
   }) async {
-    try {
-      isSaving.value = true;
-      errorMessage.value = '';
-      final updated = await _repository.updateUser(id, {
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-      });
+    isSaving.value = true;
+    errorMessage.value = '';
+    final result = await _repository.updateUser(id, {
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+    });
+    isSaving.value = false;
+
+    final updated = result.model;
+    if (result.status == ResourceStatus.success && updated != null) {
       final index = users.indexWhere((user) => user.id == id);
       if (index != -1) {
         users[index] = updated;
         users.refresh();
       }
       return true;
-    } catch (error) {
-      errorMessage.value = _normalizeError(error);
-      return false;
-    } finally {
-      isSaving.value = false;
     }
+    errorMessage.value = result.message ?? 'Failed to update user';
+    return false;
   }
 
   Future<bool> deleteUser(int id) async {
-    try {
-      isSaving.value = true;
-      errorMessage.value = '';
-      await _repository.deleteUser(id);
+    isSaving.value = true;
+    errorMessage.value = '';
+    final result = await _repository.deleteUser(id);
+    isSaving.value = false;
+    if (result.status == ResourceStatus.success) {
       users.removeWhere((user) => user.id == id);
       return true;
-    } catch (error) {
-      errorMessage.value = _normalizeError(error);
-      return false;
-    } finally {
-      isSaving.value = false;
     }
+    errorMessage.value = result.message ?? 'Failed to delete user';
+    return false;
   }
 
   Future<void> logout() async {
@@ -107,13 +104,5 @@ class UsersController extends GetxController {
 
   void clearMessage() {
     errorMessage.value = '';
-  }
-
-  String _normalizeError(Object error) {
-    final message = error.toString();
-    if (message.startsWith('Exception: ')) {
-      return message.replaceFirst('Exception: ', '');
-    }
-    return message;
   }
 }

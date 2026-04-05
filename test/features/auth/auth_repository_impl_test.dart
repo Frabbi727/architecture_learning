@@ -1,5 +1,7 @@
+import 'package:architecture_learning/core/enums/enums.dart';
 import 'package:architecture_learning/core/network/api_client.dart';
 import 'package:architecture_learning/core/network/auth_storage.dart';
+import 'package:architecture_learning/core/utils/resource.dart';
 import 'package:architecture_learning/features/auth/repositories/auth_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -25,25 +27,32 @@ class _FakeApiClient extends ApiClient {
   _FakeApiClient(super.authStorage);
 
   @override
-  Future<dynamic> post(String endpoint, Map<String, dynamic> body) async {
-    return <String, dynamic>{
-      'success': true,
-      'data': <String, dynamic>{
-        'token_type': 'Bearer',
-        'access_token': 'jwt-token',
-        'expires_in': 3600,
-        'refresh_token': 'refresh-token',
-        'refresh_expires_in': 2592000,
-        'user': <String, dynamic>{
-          'id': 1,
-          'name': 'Super Admin',
-          'email': 'super.admin@example.com',
-          'role': 'super_admin',
-          'created_at': '2026-03-04T05:27:19.000000Z',
+  Future<Resource<T>> postResource<T>(
+    String endpoint,
+    Map<String, dynamic> body, {
+    required T Function(dynamic data) parser,
+  }) async {
+    return Resource<T>(
+      status: ResourceStatus.success,
+      model: parser(<String, dynamic>{
+        'success': true,
+        'data': <String, dynamic>{
+          'token_type': 'Bearer',
+          'access_token': 'jwt-token',
+          'expires_in': 3600,
+          'refresh_token': 'refresh-token',
+          'refresh_expires_in': 2592000,
+          'user': <String, dynamic>{
+            'id': 1,
+            'name': 'Super Admin',
+            'email': 'super.admin@example.com',
+            'role': 'super_admin',
+            'created_at': '2026-03-04T05:27:19.000000Z',
+          },
         },
-      },
-      'meta': <String, dynamic>{},
-    };
+        'meta': <String, dynamic>{},
+      }),
+    );
   }
 }
 

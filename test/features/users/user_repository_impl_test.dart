@@ -1,3 +1,4 @@
+import 'package:architecture_learning/core/enums/enums.dart';
 import 'package:architecture_learning/core/network/api_client.dart';
 import 'package:architecture_learning/core/network/auth_storage.dart';
 import 'package:architecture_learning/features/users/models/user_model.dart';
@@ -10,8 +11,11 @@ class _FakeUsersApiClient extends ApiClient {
   _FakeUsersApiClient(super.authStorage);
 
   @override
-  Future<dynamic> get(String endpoint) async {
-    return <String, dynamic>{
+  Future<T> get<T>(
+    String endpoint, {
+    required T Function(dynamic data) parser,
+  }) async {
+    return parser(<String, dynamic>{
       'users': <Map<String, dynamic>>[
         {
           'id': 1,
@@ -21,7 +25,7 @@ class _FakeUsersApiClient extends ApiClient {
           'image': 'https://dummyjson.com/icon/emilys/128',
         },
       ],
-    };
+    });
   }
 }
 
@@ -32,10 +36,11 @@ void main() {
       _FakeAuthStorage(),
     );
 
-    final users = await repository.fetchUsers();
+    final result = await repository.fetchUsers();
 
-    expect(users, hasLength(1));
-    expect(users.first, isA<UserModel>());
-    expect(users.first.fullName, 'Emily Johnson');
+    expect(result.status, ResourceStatus.success);
+    expect(result.model, hasLength(1));
+    expect(result.model!.first, isA<UserModel>());
+    expect(result.model!.first.fullName, 'Emily Johnson');
   });
 }

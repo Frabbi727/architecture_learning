@@ -1,4 +1,5 @@
 import 'package:architecture_learning/app/routes/app_routes.dart';
+import 'package:architecture_learning/core/enums/enums.dart';
 import 'package:architecture_learning/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,29 +22,21 @@ class LoginController extends GetxController {
       return;
     }
 
-    try {
-      isLoading.value = true;
-      errorMessage.value = '';
+    isLoading.value = true;
+    errorMessage.value = '';
 
-      await _repository.login(
-        email: usernameController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+    final result = await _repository.login(
+      email: usernameController.text.trim(),
+      password: passwordController.text.trim(),
+    );
 
+    if (result.status == ResourceStatus.success) {
       Get.offAllNamed(AppRoutes.homePage);
-    } catch (error) {
-      errorMessage.value = _normalizeError(error);
-    } finally {
-      isLoading.value = false;
+    } else {
+      errorMessage.value = result.message ?? 'Login failed';
     }
-  }
 
-  String _normalizeError(Object error) {
-    final message = error.toString();
-    if (message.startsWith('Exception: ')) {
-      return message.replaceFirst('Exception: ', '');
-    }
-    return message;
+    isLoading.value = false;
   }
 
   @override

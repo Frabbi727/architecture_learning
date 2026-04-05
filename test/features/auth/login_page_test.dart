@@ -1,3 +1,5 @@
+import 'package:architecture_learning/core/enums/enums.dart';
+import 'package:architecture_learning/core/utils/resource.dart';
 import 'package:architecture_learning/features/auth/controllers/login_controller.dart';
 import 'package:architecture_learning/features/auth/models/login_response_model.dart';
 import 'package:architecture_learning/features/auth/pages/login_page.dart';
@@ -8,11 +10,14 @@ import 'package:get/get.dart';
 
 class _FailingAuthRepository implements AuthRepository {
   @override
-  Future<LoginResponseModel> login({
+  Future<Resource<LoginResponseModel>> login({
     required String email,
     required String password,
   }) async {
-    throw Exception('Invalid credentials');
+    return Resource<LoginResponseModel>(
+      status: ResourceStatus.error,
+      message: 'Invalid credentials',
+    );
   }
 
   @override
