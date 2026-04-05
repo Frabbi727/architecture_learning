@@ -1,11 +1,12 @@
 import 'package:architecture_learning/features/auth/controllers/login_controller.dart';
+import 'package:architecture_learning/features/auth/models/login_response_model.dart';
 import 'package:architecture_learning/features/auth/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FailingAuthRepository implements AuthRepository {
   @override
-  Future<void> login({
+  Future<LoginResponseModel> login({
     required String username,
     required String password,
   }) async {

@@ -1,6 +1,7 @@
 import 'package:architecture_learning/core/constants/api_constants.dart';
 import 'package:architecture_learning/core/network/api_client.dart';
 import 'package:architecture_learning/core/network/auth_storage.dart';
+import 'package:architecture_learning/features/auth/models/login_response_model.dart';
 import 'package:architecture_learning/features/auth/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -10,30 +11,34 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthStorage _authStorage;
 
   @override
-  Future<void> login({
-    required String username,
+  Future<LoginResponseModel> login({
+    required String email,
     required String password,
   }) async {
-    final data = await _apiClient.post(
+    final response = await _apiClient.post(
       ApiConstants.login,
       {
-        'username': username,
+        'email': email,
         'password': password,
-        'expiresInMins': 30,
       },
     );
 
-    final token = data['accessToken'] as String?;
-    final refreshToken = data['refreshToken'] as String?;
+    if (response is! Map<String, dynamic>) {
+      throw Exception('Login response format was invalid');
+    }
 
-    if (token == null || token.isEmpty) {
+    final loginResponse = LoginResponseModel.fromJson(response);
+
+    if (loginResponse.data.accessToken.isEmpty) {
       throw Exception('Login succeeded but token was missing');
     }
 
-    await _authStorage.saveToken(token);
-    if (refreshToken != null && refreshToken.isNotEmpty) {
-      await _authStorage.saveRefreshToken(refreshToken);
+    await _authStorage.saveToken(loginResponse.data.accessToken);
+    if (loginResponse.data.refreshToken.isNotEmpty) {
+      await _authStorage.saveRefreshToken(loginResponse.data.refreshToken);
     }
+
+    return loginResponse;
   }
 
   @override

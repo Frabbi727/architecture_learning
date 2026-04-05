@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'https://dummyjson.com';
+  static const String baseUrl = 'https://paramountoffice.techrealify.com/api/v1';
 
   static const String login = '/auth/login';
   static const String users = '/users';

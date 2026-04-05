@@ -9,8 +9,8 @@ class LoginController extends GetxController {
   final AuthRepository _repository;
 
   final formKey = GlobalKey<FormState>();
-  final usernameController = TextEditingController(text: 'emilys');
-  final passwordController = TextEditingController(text: 'emilyspass');
+  final usernameController = TextEditingController(text: 'super.admin@example.com');
+  final passwordController = TextEditingController(text: 'Password123!');
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
@@ -26,7 +26,7 @@ class LoginController extends GetxController {
       errorMessage.value = '';
 
       await _repository.login(
-        username: usernameController.text.trim(),
+        email: usernameController.text.trim(),
         password: passwordController.text.trim(),
       );
 
