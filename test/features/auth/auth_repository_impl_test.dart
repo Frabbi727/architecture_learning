@@ -27,8 +27,22 @@ class _FakeApiClient extends ApiClient {
   @override
   Future<dynamic> post(String endpoint, Map<String, dynamic> body) async {
     return <String, dynamic>{
-      'accessToken': 'jwt-token',
-      'refreshToken': 'refresh-token',
+      'success': true,
+      'data': <String, dynamic>{
+        'token_type': 'Bearer',
+        'access_token': 'jwt-token',
+        'expires_in': 3600,
+        'refresh_token': 'refresh-token',
+        'refresh_expires_in': 2592000,
+        'user': <String, dynamic>{
+          'id': 1,
+          'name': 'Super Admin',
+          'email': 'super.admin@example.com',
+          'role': 'super_admin',
+          'created_at': '2026-03-04T05:27:19.000000Z',
+        },
+      },
+      'meta': <String, dynamic>{},
     };
   }
 }
@@ -38,7 +52,7 @@ void main() {
     final storage = _FakeAuthStorage();
     final repository = AuthRepositoryImpl(_FakeApiClient(storage), storage);
 
-    await repository.login(username: 'emilys', password: 'emilyspass');
+    await repository.login(email: 'emilys', password: 'emilyspass');
 
     expect(storage.savedToken, 'jwt-token');
     expect(storage.savedRefreshToken, 'refresh-token');

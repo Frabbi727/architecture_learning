@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 class _FailingAuthRepository implements AuthRepository {
   @override
   Future<LoginResponseModel> login({
-    required String username,
+    required String email,
     required String password,
   }) async {
     throw Exception('Invalid credentials');
